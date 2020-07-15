@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\UserRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    public $singletons = [
+        UserRepositoryInterface::class => UserRepository::class
+    ];
     /**
      * Register any application services.
      *
@@ -13,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+//        $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
     }
 
     /**

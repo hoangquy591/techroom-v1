@@ -10,13 +10,16 @@ Route::prefix('v1')->group(function (){
     */
     Route::group([
         'middleware' => 'api',
-        'prefix' => 'auth'
     ], function () {
-        Route::post('register', 'AuthController@register');
-        Route::post('login', 'AuthController@login');
-        Route::post('logout', 'AuthController@logout');
-        Route::post('refresh', 'AuthController@refresh');
-        Route::get('profile', 'AuthController@profile');
+
+        Route::prefix('auth')->group(function (){
+            Route::post('register', 'AuthController@register');
+            Route::post('login', 'AuthController@login');
+            Route::post('logout', 'AuthController@logout');
+            Route::post('refresh', 'AuthController@refresh');
+            Route::get('profile', 'AuthController@profile');
+        });
+
     });
 
 });

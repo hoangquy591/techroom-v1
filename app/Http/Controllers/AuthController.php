@@ -4,22 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    private $userRepository;
+
     /**
      * Create a new AuthController instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(UserRepositoryInterface $userRepository)
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
+
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -30,10 +32,12 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
 
-        $user = User::create(array_merge(
-            $request->validated(),
-            ['password' => bcrypt($request->password)]
-        ));
+        $request->validated();
+
+        $data = $request->all();
+        $data['password'] = bcrypt($data['password']);
+
+        $user = $this->userRepository->store($data);
 
         return response()->json([
             'message' => 'Successfully registered',
@@ -101,7 +105,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => $this->guard()->factory()->getTTL() * 60
+            'expires_in' => $this->guard()->factory()->getTTL()
         ]);
     }
 
@@ -110,7 +114,8 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Contracts\Auth\Guard
      */
-    public function guard() {
+    public function guard()
+    {
         return Auth::guard();
     }
 }
