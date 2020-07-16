@@ -5,6 +5,7 @@ namespace App\Repositories;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class BaseRepository implements RepositoryInterface
 {
@@ -47,8 +48,13 @@ class BaseRepository implements RepositoryInterface
      */
     public function show($id)
     {
-        $result = $this->model->find($id);
-        return $result;
+        try {
+            $result = $this->model->findOrFail($id);
+            return $result;
+        } catch (ModelNotFoundException $exception) {
+            return response()->json(['error' => $exception->getMessage() ]);
+        }
+
     }
 
     /**

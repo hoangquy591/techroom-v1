@@ -3,41 +3,44 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Exception;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Response;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use JWTAuth;
 
 class Authenticate extends Middleware
 {
     public function handle($request, Closure $next, ...$guards)
     {
-        if ($this->authenticate($request, $guards) === 'authentication_failed') {
-            return response()->json(['error'=>'Unauthorized'],Response::HTTP_UNAUTHORIZED);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            if (!$user) throw new Exception('User Not Found');
+        } catch (Exception $e) {
+            if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
+                return response()->json(['error_message' => 'Token Invalid'], Response::HTTP_UNAUTHORIZED);
+            } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
+                return response()->json(['error_message' => 'Token Expired'], Response::HTTP_UNAUTHORIZED);
+            } else {
+                if ($e->getMessage() === 'User Not Found') {
+                    return response()->json(['error_message' => 'User Not Found'], Response::HTTP_UNAUTHORIZED);
+                }
+                return response()->json(['error_message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            }
         }
         return $next($request);
     }
 
-    // Override authentication method
-    protected function authenticate($request, array $guards)
-    {
-        if (empty($guards)) {
-            $guards = [null];
-        }
-        foreach ($guards as $guard) {
-            if ($this->auth->guard($guard)->check()) {
-                return $this->auth->shouldUse($guard);
-            }
-        }
-        return 'authentication_failed';
-    }
     /**
      * Get the path the user should be redirected to when they are not authenticated.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return string|null
      */
     protected function redirectTo($request)
     {
-        if (! $request->expectsJson()) {
+        if (!$request->expectsJson()) {
             return route('login');
         }
     }

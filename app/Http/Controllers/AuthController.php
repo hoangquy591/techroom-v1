@@ -17,11 +17,9 @@ class AuthController extends Controller
      *
      * @return void
      */
-    public function __construct(UserRepositoryInterface $userRepository)
+    public function __construct(UserRepositoryInterface $repository)
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
-
-        $this->userRepository = $userRepository;
+        $this->userRepository = $repository;
     }
 
     /**
@@ -43,6 +41,7 @@ class AuthController extends Controller
             'message' => 'Successfully registered',
             'user' => $user
         ], Response::HTTP_OK);
+
     }
 
     /**
@@ -52,11 +51,12 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request)
     {
-        if (!$token = $this->guard()->attempt($request->validated())) {
+
+        if (!$token = auth()->attempt($request->validated())) {
             return response()->json(['error' => 'Invalid Credentials'], Response::HTTP_UNAUTHORIZED);
         }
 
-        return $this->createNewToken($token);
+        return $this->respondWithToken($token);
     }
 
     /**
@@ -66,7 +66,7 @@ class AuthController extends Controller
      */
     public function profile()
     {
-        return response()->json($this->guard()->user());
+        return response()->json(auth()->user());
     }
 
     /**
@@ -76,7 +76,7 @@ class AuthController extends Controller
      */
     public function logout()
     {
-        $this->guard()->logout();
+        auth()->logout();
 
         return response()->json([
             'message' => 'Successfully logged out'
@@ -90,7 +90,7 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->createNewToken($this->guard()->refresh());
+        return $this->respondWithToken(auth()->refresh());
     }
 
     /**
@@ -100,22 +100,12 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function createNewToken($token)
+    protected function respondWithToken($token)
     {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => $this->guard()->factory()->getTTL()
+            'expires_in' => auth()->factory()->getTTL()
         ]);
-    }
-
-    /**
-     * Get the guard to be used during authentication.
-     *
-     * @return \Illuminate\Contracts\Auth\Guard
-     */
-    public function guard()
-    {
-        return Auth::guard();
     }
 }
