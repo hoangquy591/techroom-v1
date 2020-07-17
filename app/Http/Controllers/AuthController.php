@@ -23,25 +23,26 @@ class AuthController extends Controller
     }
 
     /**
-     * Register a User.
+     * Register a UserResource.
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(RegisterRequest $request)
     {
-
         $request->validated();
-
         $data = $request->all();
         $data['password'] = bcrypt($data['password']);
 
         $user = $this->userRepository->store($data);
-
+        if ($user) {
+            $user->roles()->attach(2);
+            return response()->json([
+                'message' => 'Successfully Registered',
+            ], Response::HTTP_OK);
+        }
         return response()->json([
-            'message' => 'Successfully registered',
-            'user' => $user
-        ], Response::HTTP_OK);
-
+            'message' => 'Fail Registered',
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -60,7 +61,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the authenticated User.
+     * Get the authenticated UserResource.
      *
      * @return \Illuminate\Http\JsonResponse
      */

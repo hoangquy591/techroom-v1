@@ -4,13 +4,13 @@
 namespace App\Repositories;
 
 
-interface RepositoryInterface
+interface BaseRepositoryInterface
 {
     /**
      * Get all
      * @return mixed
      */
-    public function index();
+    public function index($attributes = []);
 
     /**
      * Store

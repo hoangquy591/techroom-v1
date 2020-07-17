@@ -37,5 +37,4 @@ class LoginRequest extends FormRequest
         throw new HttpResponseException(response()->json($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 
-
 }

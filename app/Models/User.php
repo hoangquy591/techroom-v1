@@ -17,7 +17,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'uname', 'email', 'password'
     ];
 
     /**
@@ -26,7 +26,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'id', 'password', 'email_verified_at', 'remember_token', 'created_at', 'updated_at'
     ];
 
     /**
@@ -37,6 +37,14 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function roles() {
+        return $this->belongsToMany(Role::class, 'user_role');
+    }
+
+    public function getRoleIdAttribute() {
+        return $this->roles()->pluck('role_id')->toArray();
+    }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

@@ -4,9 +4,9 @@
 namespace App\Repositories\User;
 
 
-use App\Repositories\RepositoryInterface;
+use App\Repositories\BaseRepositoryInterface;
 
-interface UserRepositoryInterface extends RepositoryInterface
+interface UserRepositoryInterface extends BaseRepositoryInterface
 {
-
+    public function showByUname($uname);
 }

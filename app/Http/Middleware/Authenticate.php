@@ -16,15 +16,15 @@ class Authenticate extends Middleware
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            if (!$user) throw new Exception('User Not Found');
+            if (!$user) throw new Exception('UserResource Not Found');
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
                 return response()->json(['error_message' => 'Token Invalid'], Response::HTTP_UNAUTHORIZED);
             } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
                 return response()->json(['error_message' => 'Token Expired'], Response::HTTP_UNAUTHORIZED);
             } else {
-                if ($e->getMessage() === 'User Not Found') {
-                    return response()->json(['error_message' => 'User Not Found'], Response::HTTP_UNAUTHORIZED);
+                if ($e->getMessage() === 'UserResource Not Found') {
+                    return response()->json(['error_message' => 'UserResource Not Found'], Response::HTTP_UNAUTHORIZED);
                 }
                 return response()->json(['error_message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
             }

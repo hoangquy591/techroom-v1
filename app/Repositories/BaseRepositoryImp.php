@@ -7,7 +7,7 @@ namespace App\Repositories;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class BaseRepository implements RepositoryInterface
+class BaseRepositoryImp implements BaseRepositoryInterface
 {
     /**
      * @Model need to use in Repository
@@ -15,7 +15,7 @@ class BaseRepository implements RepositoryInterface
     protected $model;
 
     /**
-     * Inject @Model into BaseRepository by constructor
+     * Inject @Model into BaseRepositoryImp by constructor
     */
     public function __construct(Model $model)
     {
@@ -26,8 +26,11 @@ class BaseRepository implements RepositoryInterface
      * Get all
      * @return mixed
      */
-    public function index()
+    public function index($attributes = [])
     {
+        if (sizeof($attributes) > 0) {
+            return $this->model->with($attributes)->get();
+        }
         return $this->model->all();
     }
 
@@ -54,7 +57,6 @@ class BaseRepository implements RepositoryInterface
         } catch (ModelNotFoundException $exception) {
             return response()->json(['error' => $exception->getMessage() ]);
         }
-
     }
 
     /**
@@ -68,9 +70,8 @@ class BaseRepository implements RepositoryInterface
         $result = $this->model->find($id);
         if ($result) {
             $result->update($attributes);
-            return $result;
+            return true;
         }
-
         return false;
     }
 
@@ -88,4 +89,5 @@ class BaseRepository implements RepositoryInterface
         }
         return false;
     }
+
 }
